@@ -49,16 +49,25 @@ func foo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func bar(w http.ResponseWriter, r *http.Request) {
+	var p1 person
+	err := json.NewDecoder(r.Body).Decode(&p1)
+	if err != nil {
+		log.Println("Decoded bad data", err)
+	}
+	log.Println("New Person", p1)
 
 }
 
 /*
 --git notes
+git add -A
+git commit -m "Encode Example"
 git push
 git tag v.0.2.0
 git push --tags
 
 curl notes
-	curl loaclhost:8080/encode
+	curl localhost:8080/encode
+	curl -XGET -H "Content-type: application/json" -d'{"First":"Shawn"}' 'localhost:8080/decode'
 
 */
