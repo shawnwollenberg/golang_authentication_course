@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 )
 
 type person struct {
@@ -32,6 +33,23 @@ func main() {
 		log.Panic(err)
 	}
 	fmt.Println("Back to a Go Data Structure", xp2)
+
+	http.HandleFunc("/encode", foo)
+	http.HandleFunc("/decode", bar)
+	http.ListenAndServe(":8080", nil)
+
+}
+func foo(w http.ResponseWriter, r *http.Request) {
+	p1 := person{
+		First: "Shawn",
+	}
+	err := json.NewEncoder(w).Encode(p1)
+	if err != nil {
+		log.Println("Encoded bad data", err)
+	}
+}
+func bar(w http.ResponseWriter, r *http.Request) {
+
 }
 
 /*
@@ -39,4 +57,8 @@ func main() {
 git push
 git tag v.0.2.0
 git push --tags
+
+curl notes
+	curl loaclhost:8080/encode
+
 */
