@@ -1,18 +1,53 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type person struct {
 	First string
 }
 
+func test64Base() {
+	fmt.Println(base64.StdEncoding.EncodeToString([]byte("user:pass")))
+}
+
+func hashPassword(pwd string) ([]byte, error) {
+	bs, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("Error while generating bcrypt hash from password: %w", err)
+	}
+	return bs, nil
+}
+
+//separate function for comparing
+func comparePassword(password string, hashedPass []byte) error {
+	err := bcrypt.CompareHashAndPassword(hashedPass, []byte(password))
+	if err != nil {
+		return fmt.Errorf("Invalid password %w", err)
+	}
+	return nil
+}
+
 func main() {
-	p1 := person{
+	test64Base()
+	pass := "12345678"
+	hashedPass, err := hashPassword(pass)
+	if err != nil {
+		panic(err)
+	}
+	err = comparePassword(pass, hashedPass)
+	if err != nil {
+		log.Fatalln("Not logged in")
+	}
+	log.Println("Logged In!")
+	/*p1 := person{
 		First: "Shawn",
 	}
 	p2 := person{
@@ -37,6 +72,7 @@ func main() {
 	http.HandleFunc("/encode", foo)
 	http.HandleFunc("/decode", bar)
 	http.ListenAndServe(":8080", nil)
+	*/
 
 }
 func foo(w http.ResponseWriter, r *http.Request) {
@@ -63,10 +99,16 @@ func bar(w http.ResponseWriter, r *http.Request) {
 git add -A
 git commit -m "Encode Example"
 git push
-git tag v.0.2.0
+git tag v0.5.0
 git push --tags
 
+//clean version
+git stash
+git stash drop
+git stash pull
+
 curl notes
+	https://curlbuilder.com
 	curl localhost:8080/encode
 	curl -XGET -H "Content-type: application/json" -d'{"First":"Shawn"}' 'localhost:8080/decode'
 
